@@ -12,7 +12,11 @@ const BySchema = new mongoose.Schema(
     {
         firstName : {type : String, required: true},
         lastName : {type : String, required: false},
-        bookName : {type : String, required: true},
+        email : {type : String, required : true},
+        MobileNumber: {type: Number, required : true},
+        // booktitle : {type : String, required: true},
+        // writerName : {type : String, required: true},
+        // page : {type : Number, required: true},
         password : {type : String, required : true},
     },
     {
@@ -21,16 +25,19 @@ const BySchema = new mongoose.Schema(
     }
 );
 
-const ByUser = mongoose.model("book", BySchema);
+const ByUser = mongoose.model("section", BySchema);
 // naot Ho
 
 const PostSchema = new mongoose.Schema(
     {
         title : {type: String, required: true},
         body : {type: String, required: true},
+        // booktitle : {type : String, required: true},
+        writerName : {type : String, required: true},
+        page : {type : Number, required: true},
         userId:{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "book",
+            ref: "section",
             required : true,
         },
     },
@@ -40,19 +47,19 @@ const PostSchema = new mongoose.Schema(
     }
 );
 
-const PostData = mongoose.model("section", PostSchema);
+const PostData = mongoose.model("book", PostSchema);
 
 const authorSchema = new mongoose.Schema(
     {
         body: {type: String, required: true},
         postId:{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "section",
+            ref: "book",
             required: true,
         },
         userId:{
             type : mongoose.Schema.Types.ObjectId,
-            ref: "book",
+            ref: "section",
             required: true,
         },
     },
@@ -64,7 +71,7 @@ const authorSchema = new mongoose.Schema(
 
 const author = mongoose.model("author", authorSchema);
 
-app.get("/check",async(req, res)=>{
+app.get("/sections",async(req, res)=>{
     try{
         const oprts = await ByUser.find().lean().exec();
         return res.status(200).send({users: oprts});
@@ -75,7 +82,7 @@ app.get("/check",async(req, res)=>{
     }
 });
 
-app.post("/check", async(req, res)=>{
+app.post("/sections", async(req, res)=>{
     try {
         const oprt = await ByUser.create(req.body);
         return res.status(201).send(oprt);
@@ -84,7 +91,7 @@ app.post("/check", async(req, res)=>{
     }
 });
 
-app.get("/check/:id", async(req,res)=>{
+app.get("/sections/:id", async(req,res)=>{
     try {
         const oprt = await ByUser.findById(req.params.id).lean().exec();
         return res.status(200).send(oprt);
@@ -94,7 +101,7 @@ app.get("/check/:id", async(req,res)=>{
 });
 
 // hhdasdhahsddddddd
-app.patch("/check/:id", async (req,res)=>{
+app.patch("/sections/:id", async (req,res)=>{
     try {
         const oprt = await ByUser.findByIdAndUpdate(req.params.id,req.body,{
         new: true,
@@ -107,7 +114,7 @@ app.patch("/check/:id", async (req,res)=>{
     }
 });
 
-app.delete("/check/:id", async(req, res)=>{
+app.delete("/sections/:id", async(req, res)=>{
     try {
         const oprt = await ByUser.findByIdAndDelete(req.params.id).lean().exec();
         return res.status(200).send(oprt);
@@ -118,7 +125,7 @@ app.delete("/check/:id", async(req, res)=>{
 
 app.get("/books", async(req, res)=>{
     try {
-        const postMe = await PostData.find().lean().exec();
+        const postMe = await PostData.find().populate("userId").lean().exec();
         return res.status(200).send(postMe);
     } catch (error) {
         return res.status(500).send({message: error.message});
@@ -166,6 +173,57 @@ app.delete("/books/:id",async (req, res)=>{
     }
 });
 
+app.get("/authors", async(req,res)=>{
+    try {
+        const authors = await author.find().lean().exec();
+        return res.status(200).send(authors);
+    } catch (error) {
+        return res.status(500).send({message: error.message});
+    }
+});
+
+
+app.post("/authors",async (req,res)=>{
+
+    try {
+        const authors = await author.create(req.body);
+        return res.status(201).send(authors)
+    } catch (error) {
+        return res.status(500).send({message: error.message});
+    }
+});
+
+app.get("/authors/:id", async(req, res)=>{
+    try {
+        const authors = await author.findById(req.params.id).lean().exec()
+        return res.status(200).send(authors);
+    } catch (error) {
+        return res.status(500).send({message: error.message});
+    }
+});
+
+
+app.patch("/authors/:id", async(req, res)=>{
+    try {
+        const authors = await author.findByIdAndUpdate(req.params.id, req.body,{
+            new: true,
+        })
+        .lean()
+        .exec()
+        return res.status(200).send(authors);
+    } catch (error) {
+        return res.status(500).send({message: error.message});
+    }
+});
+
+app.delete("/authors/:id", async(req, res)=>{
+    try {
+        const authors = await author.findByIdAndDelete(req.params.id).lean().exec()
+        return res.status(200).send(authors);
+    } catch (error) {
+        return res.status(500).send({message: error.message});
+    }
+});
 app.listen(4000,async()=>{
     try {
         await conectes();
