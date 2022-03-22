@@ -1,7 +1,7 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
-// const { body, validationResult } = require('express-validator');
+const {validationResult } = require('express-validator');
 const GenToken = (users)=>{
     return jwt.sign({users}, process.env.JWT_SECRET);;
 }
@@ -9,6 +9,23 @@ const GenToken = (users)=>{
 const register = async(req, res)=>{
 
     try {
+        
+        // validation path
+        
+        
+        const errors = validationResult(req)
+        let final = null;
+
+        if(!errors.isEmpty()){
+
+          final = errors.array().map((err)=>{
+              return {param : err.param, msg : err.msg}
+          })
+
+          return res.status(400).send({errors : final });
+        }
+        
+        
 
        let users = await User.findOne({email : req.body.email});
 
